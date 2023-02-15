@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -15,8 +17,10 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
-    private final HashMap<Integer, User> users = new HashMap<>();
-    private int userId = 0;
+    private int userId = 0;     // Id пользователя
+    private final HashMap<Integer, User> users = new HashMap<>();       // хранилище пользователей в памяти
+
+    private User userFromRequest;
 
     @GetMapping
     public List<User> getUsers() {
@@ -25,38 +29,53 @@ public class UserController {
 
     @PostMapping
     public User addUser(@RequestBody User user) throws ValidationException {
-        if (isValid(user)) {
-            user.setId(++userId);
-            users.put(user.getId(), user);
-            log.info("Добавлен новый пользователь {}", user);
-        } else {
-            log.debug("Ошибка валидации при добавлении нового пользователя {}", user);
-            throw new ValidationException("Ошибка валидации при добавлении нового пользователя!");
-        }
+        userFromRequest = user;
+        validate(user);
+        user.setId(++userId);
+        users.put(userId, user);
+        log.info("User added successfully {}", user);
         return user;
     }
 
     @PutMapping
     public User updateUser(@RequestBody User user) throws ValidationException {
-        if (isValid(user) && users.containsKey(user.getId())) {
-            users.put(user.getId(), user);
-            log.info("Обновлены данные пользователя {}", user);
-        } else {
-            log.debug("Ошибка валидации при обновлении данных пользователя {}", user);
-            throw new ValidationException("Ошибка валидации при обновлении данных пользователя!");
+        userFromRequest = user;
+        validate(user);
+        if (user.getId() == null || !users.containsKey(user.getId())) {
+            throw new ValidationException("Error! User ID not found.");
         }
+        users.put(user.getId(), user);
+        log.info("User updated successfully {}", user);
         return user;
     }
 
-    private boolean isValid(User user) {
-        if (!user.getEmail().contains("@")
-                || user.getEmail().isEmpty()
-                || user.getBirthday().isAfter(LocalDate.now())) {
-            return false;
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<User> validExceptionHandler (ValidationException e) {
+        log.error(e.getMessage());
+        if ("Error! User ID not found.".equals(e.getMessage())) {
+            return new ResponseEntity<>(userFromRequest, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(userFromRequest, HttpStatus.BAD_REQUEST);
+    }
+
+
+    private void validate(User user) throws ValidationException {
+        if (user.getEmail() == null
+                || !user.getEmail().contains("@")
+                || user.getEmail().isEmpty()) {
+            throw new ValidationException("Error! Invalid e-mail for user.");
+        }
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            throw new ValidationException("Error! Invalid birthday for user.");
+        }
+        if (user.getLogin() == null
+                || user.getLogin().contains(" ")
+                || user.getLogin().isEmpty()) {
+            throw new ValidationException("Error! Invalid user login.");
         }
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
-        return true;
     }
+
 }
