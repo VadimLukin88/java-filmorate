@@ -1,81 +1,102 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
+@Validated
 @RestController
-@RequestMapping("/users")
+//@RequestMapping("/users")
 public class UserController {
 
-    private int userId = 0;     // Id пользователя
-    private final HashMap<Integer, User> users = new HashMap<>();       // хранилище пользователей в памяти
+    private final UserStorage userStorage;
+    private final UserService userService;
 
-    private User userFromRequest;
-
-    @GetMapping
-    public List<User> getUsers() {
-        return new ArrayList<>(users.values());
+    public UserController (UserStorage userStorage, UserService userService) {
+        this.userStorage = userStorage;
+        this.userService = userService;
     }
 
-    @PostMapping
-    public User addUser(@RequestBody User user) throws ValidationException {
-        userFromRequest = user;
-        validate(user);
-        user.setId(++userId);
-        users.put(userId, user);
+
+    @GetMapping("/users")
+    public List<User> getAllUsers() {
+        return userStorage.getAllUsers();
+    }
+
+    @GetMapping("/users/{id}")
+    public User getUser(@PathVariable
+                        @NotNull(message = "Не указан Id пользователя")
+                        Long id)  {
+        return userStorage.getUserById(id);
+    }
+
+    @GetMapping("/users/{id}/friends")
+    public List<User> getUserFriendsList(@PathVariable
+                                         @NotNull(message = "Не указан Id пользователя")
+                                         Long id) {
+        return userService.getAllUsersFriends(id);
+    }
+
+    @GetMapping("/users/{id}/friends/common/{otherId}")
+    public List<User> getMutualFriendsList(@PathVariable
+                                           @NotNull(message = "Не указан Id пользователя")
+                                           Long id,
+                                           @PathVariable
+                                           @NotNull(message = "Не указан Id друга")
+                                           Long otherId) {
+        return userService.getMutualFriends(id, otherId);
+    }
+
+
+    @PostMapping("/users")
+    public User addUser(@Valid @RequestBody User user) {
+        User savedUser = userStorage.createUser(user);
         log.info("User added successfully {}", user);
-        return user;
+        return savedUser;
     }
 
-    @PutMapping
-    public User updateUser(@RequestBody User user) throws ValidationException {
-        userFromRequest = user;
-        validate(user);
-        if (user.getId() == null || !users.containsKey(user.getId())) {
-            throw new ValidationException("Error! User ID not found.");
-        }
-        users.put(user.getId(), user);
+    @PutMapping("/users")
+    public User updateUser(@Valid @RequestBody User user) {
+        User savedUser = userStorage.updateUser(user);
         log.info("User updated successfully {}", user);
-        return user;
+        return savedUser;
     }
 
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<User> validExceptionHandler (ValidationException e) {
-        log.error(e.getMessage());
-        if ("Error! User ID not found.".equals(e.getMessage())) {
-            return new ResponseEntity<>(userFromRequest, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(userFromRequest, HttpStatus.BAD_REQUEST);
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public Map<String, String> addUserToFriends(@PathVariable
+                                                @NotNull(message = "Не указан Id пользователя")
+                                                Long id,
+                                                @PathVariable
+                                                @NotNull(message = "Не указан Id друга")
+                                                Long friendId) {
+        userService.addToFriends(id, friendId);
+        return Map.of("Result",
+                           String.format("%s добавил в друзья %s",
+                                userStorage.getUserById(id).getName(),
+                                userStorage.getUserById(friendId).getName()));
     }
 
-
-    private void validate(User user) throws ValidationException {
-        if (user.getEmail() == null
-                || !user.getEmail().contains("@")
-                || user.getEmail().isEmpty()) {
-            throw new ValidationException("Error! Invalid e-mail for user.");
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Error! Invalid birthday for user.");
-        }
-        if (user.getLogin() == null
-                || user.getLogin().contains(" ")
-                || user.getLogin().isEmpty()) {
-            throw new ValidationException("Error! Invalid user login.");
-        }
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public Map<String, String> deleteUserFromFriends(@PathVariable
+                                                     @NotNull(message = "Не указан Id пользователя")
+                                                     Long id,
+                                                     @PathVariable
+                                                     @NotNull(message = "Не указан Id друга")
+                                                     Long friendId) {
+        userService.deleteFromFriends(id, friendId);
+        return Map.of("Result",
+                           String.format("%s удалил из друзей %s",
+                                   userStorage.getUserById(id).getName(),
+                                   userStorage.getUserById(friendId).getName()));
     }
 
 }

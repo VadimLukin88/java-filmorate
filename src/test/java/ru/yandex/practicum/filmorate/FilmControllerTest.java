@@ -1,255 +1,149 @@
 package ru.yandex.practicum.filmorate;
 
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.FilmController;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Slf4j
-@SpringBootTest
+@ExtendWith(SpringExtension.class)
+@WebMvcTest(controllers = FilmController.class)
 public class FilmControllerTest {
-    FilmController filmController;
 
-    @BeforeEach
-    void createController() {
-        filmController = new FilmController();
-    }
+    /** Всё написанное ниже честно украдено вот отсюда
+     * https://reflectoring.io/spring-boot-test/
+     * По сути это повтор тестов в POSTMAN, но пусть будет...
+     */
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    Film fillFilmController() {     // Добавляем фильм с корректными данными
-        Film newFilm = new Film(
-                null,
-                "The Good, the Bad and the Ugly",
-                "Spaghetti western",
-                LocalDate.of(1966,12,23),
-                161L
-        );
-        Film savedFilm = null;
+    @MockBean
+    private FilmStorage filmStorage;
+    @MockBean
+    private FilmService filmService;
+    @MockBean
+    private UserStorage userStorage;
 
-        try {
-            savedFilm = filmController.addFilm(newFilm);
-        } catch (ValidationException e) {
-            log.error(e.getMessage());
-        }
-        return savedFilm;
+    @Test
+    public void createCorrectFilmsAndUsers() throws Exception {      // создаём фильм с корректными данными
+        Film film = new Film(null, "film1", "this is film1", LocalDate.of(1980,1,1), 50L);
+
+        mockMvc.perform(post("/films")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(film)))
+            .andExpect(status().isOk());
     }
 
     @Test
-    void addCorrectFilm() {		// Добавление фильма с корректно заполненными данными
-        Film savedFilm = fillFilmController();
-        Film loadedFilm = filmController.getFilms().get(0);
+    public void createFilmWithNullOrBlankName() throws Exception {      // создаём фильм с пустым именем
+        Film film = new Film(null, "", "this is film1", LocalDate.of(1980,1,1), 50L);
 
-        assertEquals(1, filmController.getFilms().size(),"Не корректный размер списка");
-        assertEquals(savedFilm, loadedFilm, "Данные фильма не совпадают!");
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(film)))
+                .andExpect(status().isBadRequest());
+
+        film = new Film(null, null, "this is film1", LocalDate.of(1980,1,1), 50L);
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(film)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void updateCorrectFilm() {      //Обновляем данные для фильма с корректно заполненными данными
-        fillFilmController();
-        Film updFilm = new Film(
-                1,
-                "The Good, the Bad and the Ugly",
-                "epic spaghetti western",
-                LocalDate.of(1966,12,23),
-                177L
-        );
-        Film loadedFilm = null;
+    public void createFilmWithVeryLongDescription() throws Exception {      // создаём фильм с описанием более 200 символов
+        Film film = new Film(null,
+                           "name",
+                       "blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablabla",
+                                 LocalDate.of(1980,1,1),
+                         50L);
 
-        try {
-            loadedFilm = filmController.updateFilm(updFilm);
-        } catch (ValidationException e) {
-            log.error(e.getMessage());
-        }
-
-        assertEquals(1, filmController.getFilms().size(),"Не корректный размер списка");
-        assertEquals(loadedFilm, updFilm, "Данные по фильму не обновились");
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(film)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void updateFilmWithNullOrWrongId() {      //Обновляем данные для фильма с некорректным Id
-        Film savedFilm = fillFilmController();
-        Film updFilm1 = new Film(
-                null,
-                "The Good, the Bad and the Ugly",
-                "epic spaghetti western",
-                LocalDate.of(1966,12,23),
-                177L
-        );
-        Film updFilm2 = new Film(
-                10,
-                "The Good, the Bad and the Ugly",
-                "epic spaghetti western",
-                LocalDate.of(1966,12,23),
-                177L
-        );
+    public void createFilmWithIncorrectReleaseDate() throws Exception {      // создаём фильм с датой релиза до 28/12/1895
+        Film film = new Film(null,
+                "name",
+                "blablabla",
+                LocalDate.of(1880,1,1),
+                50L);
 
-        ValidationException ex1 = assertThrows(ValidationException.class,
-                () -> filmController.updateFilm(updFilm1), "Не получено исключение ");
-        ValidationException ex2 = assertThrows(ValidationException.class,
-                () -> filmController.updateFilm(updFilm2), "Не получено исключение ");
-
-        Film loadedFilm = filmController.getFilms().get(0);
-
-        assertEquals(1, filmController.getFilms().size(),"Не корректный размер списка");
-        assertEquals(savedFilm, loadedFilm, "Данные по фильму изменены");
-        assertEquals(ex1.getMessage(), "Error! Film ID not found.", "Некорректное сообщение");
-        assertEquals(ex2.getMessage(), "Error! Film ID not found.", "Некорректное сообщение");
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(film)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void addFilmWithNullOrEmptyName() {     // Добавляем фильм с некорректным именем (null или пустая строка)
-        Film newFilm1 = new Film(null, null, "no", LocalDate.of(1970,1,1), 1L);
-        Film newFilm2 = new Film(null, "", "no", LocalDate.of(1970,1,1), 1L);
+    public void createFilmWithZeroOrNegativeDuration() throws Exception {      // создаём с нулевой или отрицательной длительностью
+        Film film = new Film(null,
+                "name",
+                "blablabla",
+                LocalDate.of(1980,1,1),
+                0L);
 
-        ValidationException ex1 = assertThrows(ValidationException.class,
-                () -> filmController.addFilm(newFilm1), "Не получено исключение ");
-        ValidationException ex2 = assertThrows(ValidationException.class,
-                () -> filmController.addFilm(newFilm2), "Не получено исключение ");
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(film)))
+                .andExpect(status().isBadRequest());
 
-        assertEquals(0, filmController.getFilms().size(),"Не корректный размер списка");
-        assertEquals(ex1.getMessage(), "Error! Film name invalid.", "Некорректное сообщение");
-        assertEquals(ex2.getMessage(), "Error! Film name invalid.", "Некорректное сообщение");
+        film = new Film(null,
+                "",
+                "blablabla",
+                LocalDate.of(1980,1,1),
+                -1L);
+
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(film)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void updateFilmWithNullOrEmptyName() {      // Обновляем фильм с некорректным именем (null или пустая строка)
-        Film savedFilm = fillFilmController();
-        Film updFilm1 = new Film(1, null, "no", LocalDate.of(1970,1,1), 1L);
-        Film updFilm2 = new Film(1, "", "no", LocalDate.of(1970,1,1), 1L);
+    public void updateCorrectFilm() throws Exception {      //Обновляем данные для пользователя с корректно заполненными данными
+        Film newFilm = new Film(null,
+                "name",
+                "blablabla",
+                LocalDate.of(1980,1,1),
+                10L);
 
-        ValidationException ex1 = assertThrows(ValidationException.class,
-                () -> filmController.updateFilm(updFilm1), "Не получено исключение ");
-        ValidationException ex2 = assertThrows(ValidationException.class,
-                () -> filmController.updateFilm(updFilm2), "Не получено исключение ");
+        mockMvc.perform(post("/films")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(newFilm)))
+                .andExpect(status().isOk());
 
-        Film loadedFilm = filmController.getFilms().get(0);
+        Film updFilm = new Film(1L,
+                "film1",
+                "this is film1",
+                LocalDate.of(1980,1,1),
+                20L);
 
-        assertEquals(1, filmController.getFilms().size(),"Не корректный размер списка");
-        assertEquals(savedFilm, loadedFilm, "Данные фильма изменены");
-        assertEquals(ex1.getMessage(), "Error! Film name invalid.", "Некорректное сообщение");
-        assertEquals(ex2.getMessage(), "Error! Film name invalid.", "Некорректное сообщение");
+        mockMvc.perform(put("/films")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(updFilm)))
+                .andExpect(status().isOk());
     }
 
-    @Test
-    void addFilmWithDescriptionLongerThan200Char() { // Добавляем фильм с некорректным описанием (больше 200 символов)
-        Film newFilm = new Film(
-                null,
-                "Name",
-                "blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablavblablablablablablablablabla",
-                LocalDate.of(1970,1,1),
-                1L
-        );
-
-        ValidationException ex1 = assertThrows(ValidationException.class,
-                () -> filmController.addFilm(newFilm), "Не получено исключение ");
-
-
-        assertEquals(0, filmController.getFilms().size(),"Не корректный размер списка");
-        assertEquals(ex1.getMessage(), "Error! Film description invalid.", "Некорректное сообщение");
-    }
-
-    @Test
-    void updateFilmWithDescriptionLongerThan200Char() { // Обновляем фильм с некорректным описанием (больше 200 символов)
-        Film savedFilm = fillFilmController();
-        Film updFilm = new Film(
-                1,
-                "Name",
-                "blablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablablavblablablablablablablablabla",
-                LocalDate.of(1970,1,1),
-                1L
-        );
-
-        ValidationException ex1 = assertThrows(ValidationException.class,
-                () -> filmController.updateFilm(updFilm), "Не получено исключение ");
-
-        Film loadedFilm = filmController.getFilms().get(0);
-
-        assertEquals(1, filmController.getFilms().size(),"Не корректный размер списка");
-        assertEquals(savedFilm, loadedFilm, "Данные фильма изменены");
-        assertEquals(ex1.getMessage(), "Error! Film description invalid.", "Некорректное сообщение");
-    }
-
-    @Test
-    void addFilmReleasedBeforeCinemaEra() {     // Добавляем фильм с некорректной датой релиза
-        Film newFilm = new Film(
-                null,
-                "Name",
-                "blabla",
-                LocalDate.of(1895,12,27),
-                1L
-        );
-
-        ValidationException ex1 = assertThrows(ValidationException.class,
-                () -> filmController.addFilm(newFilm), "Не получено исключение ");
-
-        assertEquals(0, filmController.getFilms().size(),"Не корректный размер списка");
-        assertEquals(ex1.getMessage(), "Error! Film release date invalid.", "Некорректное сообщение");
-    }
-
-    @Test
-    void updateFilmReleasedBeforeCinemaEra() {      // Обновляем фильм с некорректной датой релиза
-        Film savedFilm = fillFilmController();
-        Film updFilm = new Film(
-                1,
-                "Name",
-                "blabla",
-                LocalDate.of(1895,12,27),
-                1L
-        );
-
-        ValidationException ex1 = assertThrows(ValidationException.class,
-                () -> filmController.updateFilm(updFilm), "Не получено исключение ");
-
-        Film loadedFilm = filmController.getFilms().get(0);
-
-        assertEquals(1, filmController.getFilms().size(),"Не корректный размер списка");
-        assertEquals(savedFilm, loadedFilm, "Данные фильма изменены");
-        assertEquals(ex1.getMessage(), "Error! Film release date invalid.", "Некорректное сообщение");
-    }
-
-    @Test
-    void addFilmWithNegativeDuration() {        // Добавляем фильм с отрицательной длительностью
-        Film newFilm = new Film(
-                null,
-                "Name",
-                "blabla",
-                LocalDate.of(1970,1,1),
-                -1L
-        );
-
-        ValidationException ex1 = assertThrows(ValidationException.class,
-                () -> filmController.addFilm(newFilm), "Не получено исключение ");
-
-        assertEquals(0, filmController.getFilms().size(),"Не корректный размер списка");
-        assertEquals(ex1.getMessage(), "Error! Film duration invalid.", "Некорректное сообщение");
-    }
-
-    @Test
-    void updateFilmWithNegativeDuration() {     // Обновляем фильм с отрицательной длительностью
-        Film savedFilm = fillFilmController();
-        Film updFilm = new Film(
-                1,
-                "Name",
-                "blabla",
-                LocalDate.of(1970,1,1),
-                -1L
-        );
-
-        ValidationException ex1 = assertThrows(ValidationException.class,
-                () -> filmController.updateFilm(updFilm), "Не получено исключение ");
-
-        Film loadedFilm = filmController.getFilms().get(0);
-
-        assertEquals(1, filmController.getFilms().size(),"Не корректный размер списка");
-        assertEquals(savedFilm, loadedFilm, "Данные фильма изменены");
-        assertEquals(ex1.getMessage(), "Error! Film duration invalid.", "Некорректное сообщение");
-    }
+    // тесты для update с разными некорректными Film дописывать не стал, так как там тот же механизм валидации, что и в create
 
 }
