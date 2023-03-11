@@ -6,9 +6,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
-
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -22,29 +19,25 @@ import java.util.Map;
 //@RequestMapping("/films")
 public class FilmController {
 
-    private final FilmStorage filmStorage;
     private final FilmService filmService;
-    private final UserStorage userStorage;
 
     @Autowired
-    public FilmController(FilmStorage filmStorage, FilmService filmService, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
-        this.userStorage = userStorage;
     }
 
 
 
     @GetMapping("/films")
     public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        return filmService.getAllFilms();
     }
 
     @GetMapping("/films/{id}")
     public Film getFilm(@PathVariable
                         @NotNull(message = "Не указан Id фильма")
                         Long id) {
-        return filmStorage.getFilmById(id);
+        return filmService.getFilmById(id);
     }
 
     @GetMapping("/films/popular")
@@ -54,14 +47,14 @@ public class FilmController {
 
     @PostMapping("/films")
     public Film addFilm(@Valid @RequestBody Film film) {
-        Film savedFilm = filmStorage.createFilm(film);
+        Film savedFilm = filmService.createFilm(film);
         log.info("Film added successfully {}", savedFilm);
         return savedFilm;
     }
 
     @PutMapping("/films")
     public Film updateFilm(@Valid @RequestBody Film film) {
-        Film savedFilm = filmStorage.updateFilm(film);
+        Film savedFilm = filmService.updateFilm(film);
         log.info("Film updated successfully {}", savedFilm);
         return savedFilm;
     }
@@ -75,7 +68,7 @@ public class FilmController {
                                               Long userId) {
         filmService.addLike(id, userId);
         return Map.of("Result",
-                String.format("Поставили like фильму %s", filmStorage.getFilmById(id).getName()));
+                String.format("Поставили like фильму %s", filmService.getFilmById(id).getName()));
     }
 
     @DeleteMapping("/films/{id}/like/{userId}")
@@ -87,7 +80,7 @@ public class FilmController {
                                                  Long userId) {
         filmService.deleteLike(id, userId);
         return Map.of("Result",
-                String.format("Удалили like для фильма %s", filmStorage.getFilmById(id).getName()));
+                String.format("Удалили like для фильма %s", filmService.getFilmById(id).getName()));
     }
 
 }

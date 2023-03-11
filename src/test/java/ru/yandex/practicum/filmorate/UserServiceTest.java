@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -45,9 +46,9 @@ class UserServiceTest {
     @Test
     public void addFriendsForUserWithWrongId() {
         fillUserStorage();
-        assertThrows(ValidationException.class, () -> userService.addToFriends(10L,2L), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> userService.addToFriends(1L,10L), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> userService.addToFriends(-1L,-1L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> userService.addToFriends(10L,2L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> userService.addToFriends(1L,10L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> userService.addToFriends(-1L,-1L), "Не получено нужное исключение");
         assertThrows(ValidationException.class, () -> userService.addToFriends(null,1L), "Не получено нужное исключение");
         assertThrows(ValidationException.class, () -> userService.addToFriends(1L,null), "Не получено нужное исключение");
         assertThrows(ValidationException.class, () -> userService.addToFriends(null,null), "Не получено нужное исключение");
@@ -74,9 +75,9 @@ class UserServiceTest {
     @Test
     public void deleteFriendsForUserWithWrongId() {
         fillUserStorage();
-        assertThrows(ValidationException.class, () -> userService.deleteFromFriends(10L,2L), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> userService.deleteFromFriends(1L,10L), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> userService.deleteFromFriends(-1L,-1L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> userService.deleteFromFriends(10L,2L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> userService.deleteFromFriends(1L,10L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> userService.deleteFromFriends(-1L,-1L), "Не получено нужное исключение");
         assertThrows(ValidationException.class, () -> userService.deleteFromFriends(null,1L), "Не получено нужное исключение");
         assertThrows(ValidationException.class, () -> userService.deleteFromFriends(1L,null), "Не получено нужное исключение");
         assertThrows(ValidationException.class, () -> userService.deleteFromFriends(null,null), "Не получено нужное исключение");
@@ -98,11 +99,11 @@ class UserServiceTest {
     @Test
     public void getAllFriendsOfUserWithWrongId() {
         assertThrows(ValidationException.class, () -> userService.getAllUsersFriends(null), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> userService.getAllUsersFriends(-1L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> userService.getAllUsersFriends(-1L), "Не получено нужное исключение");
         fillUserStorage();
         assertThrows(ValidationException.class, () -> userService.getAllUsersFriends(null), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> userService.getAllUsersFriends(10L), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> userService.getAllUsersFriends(-1L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> userService.getAllUsersFriends(10L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> userService.getAllUsersFriends(-1L), "Не получено нужное исключение");
     }
 
     @Test
@@ -118,8 +119,8 @@ class UserServiceTest {
     @Test
     public void getMutualFriendsForTwoUsersWithWrongId() {
         fillUserStorage();
-        assertThrows(ValidationException.class, () -> userService.getMutualFriends(-1L,1L), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> userService.getMutualFriends(1L, -1L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> userService.getMutualFriends(-1L,1L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> userService.getMutualFriends(1L, -1L), "Не получено нужное исключение");
         assertThrows(ValidationException.class, () -> userService.getMutualFriends(null, 1L), "Не получено нужное исключение");
         assertThrows(ValidationException.class, () -> userService.getMutualFriends(1L, null), "Не получено нужное исключение");
         assertThrows(ValidationException.class, () -> userService.getMutualFriends(null, null), "Не получено нужное исключение");

@@ -11,8 +11,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 
@@ -34,11 +32,8 @@ public class FilmControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private FilmStorage filmStorage;
-    @MockBean
     private FilmService filmService;
-    @MockBean
-    private UserStorage userStorage;
+
 
     @Test
     public void createCorrectFilmsAndUsers() throws Exception {      // создаём фильм с корректными данными

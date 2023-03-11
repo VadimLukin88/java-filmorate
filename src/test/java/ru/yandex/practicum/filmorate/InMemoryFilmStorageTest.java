@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
@@ -79,7 +80,7 @@ class InMemoryFilmStorageTest {
 
     @Test
     public void deleteFilmFromEmptyStorage() {
-        assertThrows(ValidationException.class, () -> filmStorage.deleteFilm(1L), "Не получено исключение");
+        assertThrows(DataNotFoundException.class, () -> filmStorage.deleteFilm(1L), "Не получено исключение");
     }
 
     @Test
@@ -88,7 +89,7 @@ class InMemoryFilmStorageTest {
         filmStorage.deleteFilm(1L);
 
         assertEquals(filmStorage.getAllFilms().size(), 2, "Некорректный размер списка");
-        assertThrows(ValidationException.class, () -> filmStorage.getFilmById(1L), "Не получено исключение");
+        assertThrows(DataNotFoundException.class, () -> filmStorage.getFilmById(1L), "Не получено исключение");
     }
 
     @Test
@@ -96,6 +97,6 @@ class InMemoryFilmStorageTest {
         fillFilmStorage();
 
         assertThrows(ValidationException.class, () -> filmStorage.validateId(null), "Не получено исключение");
-        assertThrows(ValidationException.class, () -> filmStorage.validateId(9999L), "Не получено исключение");
+        assertThrows(DataNotFoundException.class, () -> filmStorage.validateId(9999L), "Не получено исключение");
     }
 }

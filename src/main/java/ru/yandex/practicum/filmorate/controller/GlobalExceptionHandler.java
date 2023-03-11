@@ -9,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import javax.validation.ConstraintViolation;
@@ -53,4 +54,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(Map.of("Error", "Ошибка валидации Id объекта" , "Details", e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(DataNotFoundException.class)
+    @ResponseBody
+    ResponseEntity<Map<String, String>> handleDataNotFoundException(DataNotFoundException e) {
+        log.error("Ошибка валидации Id. " + e.getMessage());
+        return new ResponseEntity<>(Map.of("Error", "Id объекта не найден" , "Details", e.getMessage()), HttpStatus.NOT_FOUND);
+    }
 }

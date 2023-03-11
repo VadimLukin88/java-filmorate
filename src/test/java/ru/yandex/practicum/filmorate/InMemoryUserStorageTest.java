@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
@@ -67,7 +68,7 @@ class InMemoryUserStorageTest {
 
     @Test
     public void deleteUserFromEmptyStorage() {
-        assertThrows(ValidationException.class, () -> userStorage.deleteUser(1L), "Не получено исключение");
+        assertThrows(DataNotFoundException.class, () -> userStorage.deleteUser(1L), "Не получено исключение");
     }
 
     @Test
@@ -99,6 +100,6 @@ class InMemoryUserStorageTest {
         fillUserStorage();
 
         assertThrows(ValidationException.class, () -> userStorage.validateId(null), "Не получено исключение");
-        assertThrows(ValidationException.class, () -> userStorage.validateId(9999L), "Не получено исключение");
+        assertThrows(DataNotFoundException.class, () -> userStorage.validateId(9999L), "Не получено исключение");
     }
 }

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -48,7 +49,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new ValidationException("Id фильма равен null");
         }
         if (!films.containsKey(id)) {
-            throw new ValidationException(String.format("Фильм с Id = %s не найден", id));
+            throw new DataNotFoundException(String.format("Фильм с Id = %s не найден", id));
         }
     }
 }

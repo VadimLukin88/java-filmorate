@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -59,10 +60,10 @@ class FilmServiceTest {
     @Test
     public void addLikeWrongId() {
         fillFilmStorage();
-        assertThrows(ValidationException.class, () -> filmService.addLike(-1L, 1L), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> filmService.addLike(10L, 2L), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> filmService.addLike(2L, -1L), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> filmService.addLike(2L, 10L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> filmService.addLike(-1L, 1L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> filmService.addLike(10L, 2L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> filmService.addLike(2L, -1L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> filmService.addLike(2L, 10L), "Не получено нужное исключение");
         assertThrows(ValidationException.class, () -> filmService.addLike(null, 1L), "Не получено нужное исключение");
         assertThrows(ValidationException.class, () -> filmService.addLike(2L, null), "Не получено нужное исключение");
 
@@ -94,10 +95,10 @@ class FilmServiceTest {
     @Test
     public void deleteLikesWrongId() {
         fillFilmStorage();
-        assertThrows(ValidationException.class, () -> filmService.deleteLike(-1L, 1L), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> filmService.deleteLike(10L, 2L), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> filmService.deleteLike(2L, -1L), "Не получено нужное исключение");
-        assertThrows(ValidationException.class, () -> filmService.deleteLike(2L, 10L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> filmService.deleteLike(-1L, 1L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> filmService.deleteLike(10L, 2L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> filmService.deleteLike(2L, -1L), "Не получено нужное исключение");
+        assertThrows(DataNotFoundException.class, () -> filmService.deleteLike(2L, 10L), "Не получено нужное исключение");
         assertThrows(ValidationException.class, () -> filmService.deleteLike(null, 1L), "Не получено нужное исключение");
         assertThrows(ValidationException.class, () -> filmService.deleteLike(2L, null), "Не получено нужное исключение");
 

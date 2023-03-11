@@ -52,4 +52,11 @@ public class UserService {
         return mutualFriendsList;
     }
 
-}
+    // Переносим методы из User Storage
+    public List<User> getAllUsers() { return userStorage.getAllUsers(); }
+    public User createUser(User user) { return userStorage.createUser(user); }
+    public User updateUser(User user) { return userStorage.updateUser(user); }
+    public void deleteUser(Long userId) { userStorage.deleteUser(userId); }
+    public User getUserById(Long userId) { return userStorage.getUserById(userId); }
+
+    }

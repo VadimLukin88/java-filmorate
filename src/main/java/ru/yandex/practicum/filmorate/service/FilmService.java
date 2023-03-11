@@ -43,4 +43,17 @@ public class FilmService {
                 .collect(Collectors.toList())
                 .subList(0, count);
     }
+
+    // Переносим методы из Film Storage
+
+    public List<Film> getAllFilms() { return filmStorage.getAllFilms(); }
+
+    public Film createFilm(Film film) { return filmStorage.createFilm(film); }
+
+    public Film updateFilm(Film film) { return filmStorage.updateFilm(film); }
+
+    public void deleteFilm(Long filmId) { filmStorage.deleteFilm(filmId); }
+
+    public Film getFilmById(Long filmId) { return filmStorage.getFilmById(filmId); }
+
 }
