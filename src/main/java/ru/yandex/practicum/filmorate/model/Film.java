@@ -24,7 +24,7 @@ public class Film {
     private final Long duration;
     private final MpaRating mpa;
     private final Long rate;
-    private final Set<Genre> genres = new TreeSet<>();   //список жанров
+    private List<Genre> genres;   //список жанров
 //    private final List<LikeForFilm> likes = new ArrayList<>();      //Список лайков (id пользователей)
 
     public Map<String,Object> toMap(){

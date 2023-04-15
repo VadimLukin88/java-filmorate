@@ -9,9 +9,9 @@ public class Genre implements Comparable<Genre> {
 
     @Override
     public int compareTo(Genre o) {
-        if (this.getId() > o.getId()) {
+        if (this.getId() < o.getId()) {
             return 1;
-        } else if (this.getId() < o.getId()) {
+        } else if (this.getId() > o.getId()) {
             return -1;
         } else {
             return 0;

@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.InDbImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -18,7 +19,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Component("filmDbStorage")
@@ -76,10 +77,18 @@ public class FilmDbStorage implements FilmStorage {
         Long id = keyHolder.getKey().longValue();
 
         film.setId(id);
+
+        if (film.getGenres() == null) { return film; }
         String genreSql = "INSERT INTO films_genre(film_id, genre_id) VALUES(?, ?);";
-        for (Genre genre : film.getGenres()) {
+
+        SortedSet<Genre> genreSet = new TreeSet<Genre>(Collections.reverseOrder());
+
+        genreSet.addAll(film.getGenres());
+        for (Genre genre : genreSet) {
             jdbcTemplate.update(genreSql, id, genre.getId());
         }
+
+        film.setGenres(new ArrayList<>(genreSet));
         return film;
     }
 
@@ -99,11 +108,19 @@ public class FilmDbStorage implements FilmStorage {
                             film.getMpa().getId(),
                             film.getRate(),
                             film.getId());
-
+        if (film.getGenres() == null) { return film; }
         jdbcTemplate.update("DELETE films_genre WHERE film_id = ?;", film.getId());
-        for (Genre genre : film.getGenres()) {
+        // Весь последующий говнокод с преобразованием жанров из List в Set и обратно
+        // нужен только для прохождения тестов Postman.
+        // Если делать Set/SortedSet у жанров фильма сразу в объекте Film,
+        // то список жанров возвращается в теле 200 OK в произвольном порядке, что не допустимо в тесте...
+        SortedSet<Genre> genreSet = new TreeSet<Genre>(Collections.reverseOrder());
+
+        genreSet.addAll(film.getGenres());
+        for (Genre genre : new TreeSet<Genre>(film.getGenres())) {
             jdbcTemplate.update("INSERT INTO films_genre VALUES (?,?);", film.getId(), genre.getId());
         }
+        film.setGenres(new ArrayList<>(genreSet));
         return film;
     }
 
@@ -183,7 +200,8 @@ public class FilmDbStorage implements FilmStorage {
                         rs.getDate("f_date").toLocalDate(),
                         rs.getLong("f_duration"),
                         new MpaRating(rs.getLong("mr_id"), rs.getString("mr_name")),
-                        rs.getLong("f_rate")
+                        rs.getLong("f_rate"),
+                        new ArrayList<>()
                 );
             }
         };
