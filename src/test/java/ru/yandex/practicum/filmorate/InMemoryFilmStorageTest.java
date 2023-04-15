@@ -40,7 +40,7 @@ class InMemoryFilmStorageTest {
 
     @Test
     public void createFilmInEmptyStorage() {
-        filmStorage.createFilm(new Film(null ,
+        filmStorage.createFilm(new Film(null,
                                     "film1",
                                 "this is film1",
                                            LocalDate.of(1900,1,1),
