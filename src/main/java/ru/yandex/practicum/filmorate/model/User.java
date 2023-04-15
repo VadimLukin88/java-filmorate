@@ -5,8 +5,7 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @AllArgsConstructor     //For JUnit Tests
@@ -20,9 +19,13 @@ public class User {
     private String name;
     @PastOrPresent(message = "Дата рождения пользователя должна быть до текущей даты")
     private final LocalDate birthday;
-    private final Set<Long> friends = new HashSet<>();
 
-    public void addUsersFriend (Long friendId) { friends.add(friendId); }
-
-    public void removeUsersFriend (Long friendId) { friends.remove(friendId); }
+    public Map<String,Object> toMap(){
+        Map<String, Object> user = new HashMap<>();
+        user.put("email", email);
+        user.put("login", login);
+        user.put("name", name);
+        user.put("birthday", birthday);
+        return user;
+    }
 }

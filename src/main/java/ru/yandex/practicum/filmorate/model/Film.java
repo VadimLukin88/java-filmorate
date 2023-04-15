@@ -2,16 +2,16 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
-@AllArgsConstructor     //For JUnit Tests
+@AllArgsConstructor
 public class Film {
     private Long id;
     @NotBlank(message = "Имя фильма не должно быть пустым")
@@ -22,8 +22,19 @@ public class Film {
     private final LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма должна быть больше 0")
     private final Long duration;
-    private final Set<Long> likes = new HashSet<>();
+    private final MpaRating mpa;
+    private final Long rate;
+    private final Set<Genre> genres = new TreeSet<>();   //список жанров
+//    private final List<LikeForFilm> likes = new ArrayList<>();      //Список лайков (id пользователей)
 
-    public void addUsersLike (Long userId) { likes.add(userId); }
-    public void removeUsersLike (Long userId) { likes.remove(userId); }
+    public Map<String,Object> toMap(){
+        Map<String, Object> film = new HashMap<>();
+        film.put("name", name);
+        film.put("description", description);
+        film.put("releaseDate", releaseDate);
+        film.put("duration", duration);
+        film.put("mpa", mpa.getId());
+        film.put("rate", rate);
+        return film;
+    }
 }

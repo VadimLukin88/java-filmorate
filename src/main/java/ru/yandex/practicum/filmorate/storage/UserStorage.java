@@ -16,4 +16,12 @@ public interface UserStorage {
     User getUserById(Long id);  // получение объекта User по Id
 
     void validateId(Long id);      // проверка корректности Id
+
+    void addToFriends(Long userId, Long friendId);
+
+    void deleteFromFriends(Long userId, Long friendId);
+
+    List<User> getAllUsersFriends(Long userId);
+
+    List<User> getMutualFriends(Long userId, Long otherId);
 }

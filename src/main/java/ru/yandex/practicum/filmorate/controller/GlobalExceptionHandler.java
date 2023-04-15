@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -15,6 +16,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -59,5 +61,12 @@ public class GlobalExceptionHandler {
     ResponseEntity<Map<String, String>> handleDataNotFoundException(DataNotFoundException e) {
         log.error("Ошибка валидации Id. " + e.getMessage());
         return new ResponseEntity<>(Map.of("Error", "Id объекта не найден" , "Details", e.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(SQLException.class)
+    @ResponseBody
+    ResponseEntity<Map<String, String>> handleSQLException(SQLException e) {
+        log.error("Ошибка обработки SQL запроса. " + e.getMessage());
+        return new ResponseEntity<>(Map.of("Error", "Ошибка обработки SQL запроса" , "Details", e.getMessage()), HttpStatus.NOT_FOUND);
     }
 }

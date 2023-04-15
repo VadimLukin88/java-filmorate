@@ -28,5 +28,7 @@ public interface FilmStorage {
     /** Добавил в интерфейс метод для проверки корректности полученных Id.
      */
     void validateId(Long id);      // проверка корректности Id
-
+    void addLike(Long filmId, Long userId);
+    void deleteLike(Long filmId, Long userId);
+    List<Film> getTopFilms(Integer count);
 }
