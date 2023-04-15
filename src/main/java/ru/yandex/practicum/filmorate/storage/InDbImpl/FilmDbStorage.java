@@ -150,7 +150,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void validateId(Long id){
+    public void validateId(Long id) {
         String sql = "SELECT TOP 1 1 FROM films f WHERE f.id = ?;";
         try {
             jdbcTemplate.queryForObject(sql, Long.class, id);
