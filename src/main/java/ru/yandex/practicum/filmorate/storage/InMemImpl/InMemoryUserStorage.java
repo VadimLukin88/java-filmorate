@@ -21,6 +21,7 @@ public class InMemoryUserStorage implements UserStorage {
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
     }
+
     @Override
     public User createUser(User user) {     // создание/добавление пользователя
         if (user.getName() == null || user.getName().isEmpty()) {   // требование из ТЗ_9 - если NAME не заполнено, то записываем в NAME значение из LOGIN
@@ -61,15 +62,21 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void addToFriends(Long userId, Long friendId) {}
+    public void addToFriends(Long userId, Long friendId) {
+    }
 
     @Override
-    public void deleteFromFriends(Long userId, Long friendId) {}
+    public void deleteFromFriends(Long userId, Long friendId) {
+    }
 
     @Override
-    public List<User> getAllUsersFriends(Long userId) { return null; }
+    public List<User> getAllUsersFriends(Long userId) {
+        return null;
+    }
 
     @Override
-    public List<User> getMutualFriends(Long userId, Long otherId) { return null; }
+    public List<User> getMutualFriends(Long userId, Long otherId) {
+        return null;
+    }
 
 }

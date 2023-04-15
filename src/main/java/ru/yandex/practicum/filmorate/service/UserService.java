@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class UserService {
 
-    private UserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
@@ -42,19 +42,27 @@ public class UserService {
     }
 
     // Переносим методы из User Storage
-    public List<User> getAllUsers() { return userStorage.getAllUsers(); }
-    public User createUser(User user) { return userStorage.createUser(user); }
+    public List<User> getAllUsers() {
+        return userStorage.getAllUsers();
+    }
+
+    public User createUser(User user) {
+        return userStorage.createUser(user);
+    }
+
     public User updateUser(User user) {
         userStorage.validateId(user.getId());
         return userStorage.updateUser(user);
     }
+
     public void deleteUser(Long userId) {
         userStorage.validateId(userId);
         userStorage.deleteUser(userId);
     }
+
     public User getUserById(Long userId) {
         userStorage.validateId(userId);
         return userStorage.getUserById(userId);
     }
 
-    }
+}

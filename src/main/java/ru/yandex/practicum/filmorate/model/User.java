@@ -19,13 +19,4 @@ public class User {
     private String name;
     @PastOrPresent(message = "Дата рождения пользователя должна быть до текущей даты")
     private final LocalDate birthday;
-
-    public Map<String,Object> toMap(){
-        Map<String, Object> user = new HashMap<>();
-        user.put("email", email);
-        user.put("login", login);
-        user.put("name", name);
-        user.put("birthday", birthday);
-        return user;
-    }
 }

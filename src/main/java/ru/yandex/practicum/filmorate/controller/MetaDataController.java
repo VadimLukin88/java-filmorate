@@ -18,7 +18,7 @@ public class MetaDataController {
     private final MetaDataService metaDataService;
 
     @Autowired
-    private MetaDataController (MetaDataService metaDataService) {
+    private MetaDataController(MetaDataService metaDataService) {
         this.metaDataService = metaDataService;
     }
 

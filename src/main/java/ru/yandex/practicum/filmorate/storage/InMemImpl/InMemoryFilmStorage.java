@@ -18,6 +18,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public List<Film> getAllFilms() {
         return new ArrayList<>(films.values());
     }
+
     @Override
     public Film createFilm(Film film) {     // создание/добавление фильма
         film.setId(++filmId);
@@ -55,9 +56,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void addLike(Long filmId, Long userId) {}
+    public void addLike(Long filmId, Long userId) {
+    }
+
     @Override
-    public void deleteLike(Long filmId, Long userId){}
+    public void deleteLike(Long filmId, Long userId){
+    }
     @Override
-    public List<Film> getTopFilms(Integer count) {return null;}
+    public List<Film> getTopFilms(Integer count) {
+        return null;
+    }
 }

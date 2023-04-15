@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
@@ -26,15 +25,4 @@ public class Film {
     private final Long rate;
     private List<Genre> genres;   //список жанров
 //    private final List<LikeForFilm> likes = new ArrayList<>();      //Список лайков (id пользователей)
-
-    public Map<String,Object> toMap(){
-        Map<String, Object> film = new HashMap<>();
-        film.put("name", name);
-        film.put("description", description);
-        film.put("releaseDate", releaseDate);
-        film.put("duration", duration);
-        film.put("mpa", mpa.getId());
-        film.put("rate", rate);
-        return film;
-    }
 }

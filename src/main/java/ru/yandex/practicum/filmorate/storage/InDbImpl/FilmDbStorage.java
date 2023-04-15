@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage.InDbImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -70,7 +69,9 @@ public class FilmDbStorage implements FilmStorage {
             stmt.setLong(5, film.getMpa().getId());
             Long rate = 0L;
 
-            if (film.getRate() != null) { rate = film.getRate();  }
+            if (film.getRate() != null) {
+                rate = film.getRate();
+            }
             stmt.setLong(6, rate);
             return stmt;
         }, keyHolder);
@@ -78,7 +79,9 @@ public class FilmDbStorage implements FilmStorage {
 
         film.setId(id);
 
-        if (film.getGenres() == null) { return film; }
+        if (film.getGenres() == null) {
+            return film;
+        }
         String genreSql = "INSERT INTO films_genre(film_id, genre_id) VALUES(?, ?);";
 
         SortedSet<Genre> genreSet = new TreeSet<Genre>(Collections.reverseOrder());
@@ -108,7 +111,9 @@ public class FilmDbStorage implements FilmStorage {
                             film.getMpa().getId(),
                             film.getRate(),
                             film.getId());
-        if (film.getGenres() == null) { return film; }
+        if (film.getGenres() == null) {
+            return film;
+        }
         jdbcTemplate.update("DELETE films_genre WHERE film_id = ?;", film.getId());
         // Весь последующий говнокод с преобразованием жанров из List в Set и обратно
         // нужен только для прохождения тестов Postman.

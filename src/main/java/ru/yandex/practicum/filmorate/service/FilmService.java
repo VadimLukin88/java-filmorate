@@ -12,11 +12,11 @@ import java.util.List;
 @Service
 public class FilmService {
 
-    private FilmStorage filmStorage;
-    private UserStorage userStorage;
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     @Autowired
-    public FilmService (@Qualifier("filmDbStorage") FilmStorage filmStorage, @Qualifier("userDbStorage") UserStorage userStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, @Qualifier("userDbStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -37,9 +37,13 @@ public class FilmService {
         return filmStorage.getTopFilms(count);
     }
 
-    public List<Film> getAllFilms() { return filmStorage.getAllFilms(); }
+    public List<Film> getAllFilms() {
+        return filmStorage.getAllFilms();
+    }
 
-    public Film createFilm(Film film) { return filmStorage.createFilm(film); }
+    public Film createFilm(Film film) {
+        return filmStorage.createFilm(film);
+    }
 
     public Film updateFilm(Film film) {
         filmStorage.validateId(film.getId());

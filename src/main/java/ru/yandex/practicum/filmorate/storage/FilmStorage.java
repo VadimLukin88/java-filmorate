@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-
 import java.util.List;
 
 public interface FilmStorage {
@@ -18,7 +16,6 @@ public interface FilmStorage {
     /** В ТЗ указано:
      * << С помощью аннотации @PathVariable добавьте возможность получать каждый фильм
      * и данные о пользователях по их уникальному идентификатору: GET .../users/{id}. >>
-     *
      * Поэтому считаю что нужно добавить в интерфейс метод для извлечения фильма по Id.
      * Аналогично и для интерфейса UserStorage
      */
@@ -28,7 +25,10 @@ public interface FilmStorage {
     /** Добавил в интерфейс метод для проверки корректности полученных Id.
      */
     void validateId(Long id);      // проверка корректности Id
+
     void addLike(Long filmId, Long userId);
+
     void deleteLike(Long filmId, Long userId);
+
     List<Film> getTopFilms(Integer count);
 }

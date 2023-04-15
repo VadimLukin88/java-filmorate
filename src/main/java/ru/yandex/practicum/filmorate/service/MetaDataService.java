@@ -18,12 +18,20 @@ public class MetaDataService {
         this.metaDataStorage = metaDataStorage;
     }
 
-    public List<Genre> getAllGenres() { return metaDataStorage.getAllGenres(); }
+    public List<Genre> getAllGenres() {
+        return metaDataStorage.getAllGenres();
+    }
 
-    public Genre getGenreById(Long id) { return metaDataStorage.getGenreById(id); }
+    public Genre getGenreById(Long id) {
+        return metaDataStorage.getGenreById(id);
+    }
 
-    public List<MpaRating> getAllMpaRating() { return metaDataStorage.getAllMpaRating(); }
+    public List<MpaRating> getAllMpaRating() {
+        return metaDataStorage.getAllMpaRating();
+    }
 
-    public MpaRating getMpaRatingById(Long id) { return metaDataStorage.getMpaRatingById(id); }
+    public MpaRating getMpaRatingById(Long id) {
+        return metaDataStorage.getMpaRatingById(id);
+    }
 
 }
