@@ -41,9 +41,10 @@ public class FilmDbStorage implements FilmStorage {
                 .toString();
 
         String genreSgl = new StringBuilder()
-                .append("SELECT fg.genre_id, g.name FROM films_genre fg ")
+                .append("SELECT fg.genre_id g_id, g.name FROM films_genre fg ")
                 .append("JOIN genre g ON fg.genre_id = g.id ")
-                .append("WHERE fg.film_id = ?;")
+                .append("WHERE fg.film_id = ? ")
+                .append("ORDER BY g_id;")
                 .toString();
 
         List<Film> allFilms = jdbcTemplate.query(filmSql, filmRowMapper());
@@ -84,14 +85,9 @@ public class FilmDbStorage implements FilmStorage {
         }
         String genreSql = "INSERT INTO films_genre(film_id, genre_id) VALUES(?, ?);";
 
-        SortedSet<Genre> genreSet = new TreeSet<Genre>(Collections.reverseOrder());
-
-        genreSet.addAll(film.getGenres());
-        for (Genre genre : genreSet) {
+        for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(genreSql, id, genre.getId());
         }
-
-        film.setGenres(new ArrayList<>(genreSet));
         return film;
     }
 
@@ -115,17 +111,9 @@ public class FilmDbStorage implements FilmStorage {
             return film;
         }
         jdbcTemplate.update("DELETE films_genre WHERE film_id = ?;", film.getId());
-        // Весь последующий говнокод с преобразованием жанров из List в Set и обратно
-        // нужен только для прохождения тестов Postman.
-        // Если делать Set/SortedSet у жанров фильма сразу в объекте Film,
-        // то список жанров возвращается в теле 200 OK в произвольном порядке, что не допустимо в тесте...
-        SortedSet<Genre> genreSet = new TreeSet<Genre>(Collections.reverseOrder());
-
-        genreSet.addAll(film.getGenres());
-        for (Genre genre : new TreeSet<Genre>(film.getGenres())) {
+        for (Genre genre : film.getGenres()) {
             jdbcTemplate.update("INSERT INTO films_genre VALUES (?,?);", film.getId(), genre.getId());
         }
-        film.setGenres(new ArrayList<>(genreSet));
         return film;
     }
 
@@ -142,7 +130,7 @@ public class FilmDbStorage implements FilmStorage {
                 + "JOIN MPA_RATING mr ON f.MPA_ID = mr.ID "
                 + "WHERE f.ID = ?";
 
-        String genreSgl = "SELECT fg.GENRE_ID, g.NAME FROM FILMS_GENRE fg JOIN GENRE g  ON fg.GENRE_ID = g.ID WHERE fg.FILM_ID = ?";
+        String genreSgl = "SELECT fg.GENRE_ID g_id, g.NAME FROM films_genre fg JOIN GENRE g  ON fg.GENRE_ID = g.ID WHERE fg.FILM_ID = ? ORDER BY g_id;";
 
         Film film = jdbcTemplate.queryForObject(sql, filmRowMapper(), id);
         film.getGenres().addAll(jdbcTemplate.query(genreSgl, genreRowMapper(), id));
@@ -206,8 +194,7 @@ public class FilmDbStorage implements FilmStorage {
                         rs.getLong("f_duration"),
                         new MpaRating(rs.getLong("mr_id"), rs.getString("mr_name")),
                         rs.getLong("f_rate"),
-                        new ArrayList<>()
-                );
+                        new TreeSet<>(Genre::compareTo));
             }
         };
     }

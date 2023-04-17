@@ -26,8 +26,6 @@ public class FilmController {
         this.filmService = filmService;
     }
 
-
-
     @GetMapping("/films")
     public List<Film> getAllFilms() {
         return filmService.getAllFilms();

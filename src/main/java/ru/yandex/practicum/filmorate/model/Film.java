@@ -23,6 +23,6 @@ public class Film {
     private final Long duration;
     private final MpaRating mpa;
     private final Long rate;
-    private List<Genre> genres;   //список жанров
+    private SortedSet<Genre> genres = new TreeSet<>(Genre::compareTo);   //список жанров
 //    private final List<LikeForFilm> likes = new ArrayList<>();      //Список лайков (id пользователей)
 }

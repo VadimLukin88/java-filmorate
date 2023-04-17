@@ -8,19 +8,17 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.DataNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MpaRating;
-import ru.yandex.practicum.filmorate.storage.MetaDataStorage;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.util.List;
 
 @Slf4j
 @Component
-public class MetaDataDbStorage implements MetaDataStorage {
-
+public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public MetaDataDbStorage(JdbcTemplate jdbcTemplate) {
+    public GenreDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -40,28 +38,8 @@ public class MetaDataDbStorage implements MetaDataStorage {
         return genre;
     }
 
-    public List<MpaRating> getAllMpaRating() {
-        return jdbcTemplate.query("SELECT * FROM mpa_rating", mpaRatingRowMapper());
-    }
-
-    public MpaRating getMpaRatingById(Long id) {
-        MpaRating mpaRating = null;
-        try {
-            mpaRating = jdbcTemplate.queryForObject("SELECT * FROM mpa_rating WHERE id = ?", mpaRatingRowMapper(), id);
-        } catch (EmptyResultDataAccessException e) {
-            String message = String.format("Жанр с Id = %s не найден", id);
-            log.error(message);
-            throw new DataNotFoundException(message);
-        }
-        return mpaRating;
-    }
-
-
     private RowMapper<Genre> genreRowMapper() {
         return (rs, rowNum) -> new Genre(rs.getLong("id"), rs.getString("name"));
     }
 
-    private RowMapper<MpaRating> mpaRatingRowMapper() {
-        return (rs, rowNum) -> new MpaRating(rs.getLong("id"), rs.getString("name"));
-    }
 }

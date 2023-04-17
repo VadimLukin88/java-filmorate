@@ -5,10 +5,9 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.*;
 
 @Data
-@AllArgsConstructor     //For JUnit Tests
+@AllArgsConstructor
 public class User {
     private Long id;
     @Email(message = "Некорректный e-mail пользователя")
