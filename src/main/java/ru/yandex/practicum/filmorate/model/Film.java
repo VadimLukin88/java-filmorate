@@ -7,11 +7,10 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
-@AllArgsConstructor     //For JUnit Tests
+@AllArgsConstructor
 public class Film {
     private Long id;
     @NotBlank(message = "Имя фильма не должно быть пустым")
@@ -22,8 +21,8 @@ public class Film {
     private final LocalDate releaseDate;
     @Positive(message = "Продолжительность фильма должна быть больше 0")
     private final Long duration;
-    private final Set<Long> likes = new HashSet<>();
-
-    public void addUsersLike (Long userId) { likes.add(userId); }
-    public void removeUsersLike (Long userId) { likes.remove(userId); }
+    private final MpaRating mpa;
+    private final Long rate;
+    private SortedSet<Genre> genres = new TreeSet<>(Genre::compareTo);   //список жанров
+//    private final List<LikeForFilm> likes = new ArrayList<>();      //Список лайков (id пользователей)
 }

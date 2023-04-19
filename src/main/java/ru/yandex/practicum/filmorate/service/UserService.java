@@ -1,14 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class UserService {
@@ -16,47 +14,55 @@ public class UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
     public void addToFriends(Long userId, Long friendId) {        // добавление пользователя в друзья
+        userStorage.validateId(userId);
         userStorage.validateId(friendId);
-        userStorage.getUserById(userId).addUsersFriend(friendId);
-        userStorage.getUserById(friendId).addUsersFriend(userId);
+        userStorage.addToFriends(userId, friendId);
     }
 
     public void deleteFromFriends(Long userId, Long friendId) {   // удаление пользователя из друзей
+        userStorage.validateId(userId);
         userStorage.validateId(friendId);
-        userStorage.getUserById(userId).removeUsersFriend(friendId);
-        userStorage.getUserById(friendId).removeUsersFriend(userId);
+        userStorage.deleteFromFriends(userId, friendId);
     }
 
     public List<User> getAllUsersFriends(Long userId) {  // получение списка друзей для пользователя
-        List<User> friendList = new ArrayList<>();
-        for (Long friendId : userStorage.getUserById(userId).getFriends()) {
-            friendList.add(userStorage.getUserById(friendId));
-        }
-        return friendList;
+        userStorage.validateId(userId);
+        return userStorage.getAllUsersFriends(userId);
     }
 
     public List<User> getMutualFriends(Long userId, Long otherId) {  // получение списка общих друзей
-        Set<Long> mutualFriendsId = new HashSet<>(userStorage.getUserById(userId).getFriends());
-
-        mutualFriendsId.retainAll(userStorage.getUserById(otherId).getFriends());
-        List<User> mutualFriendsList = new ArrayList<>();
-
-        for (Long id : mutualFriendsId) {
-            mutualFriendsList.add(userStorage.getUserById(id));
-        }
-        return mutualFriendsList;
+        userStorage.validateId(userId);
+        userStorage.validateId(otherId);
+        return userStorage.getMutualFriends(userId, otherId);
     }
 
     // Переносим методы из User Storage
-    public List<User> getAllUsers() { return userStorage.getAllUsers(); }
-    public User createUser(User user) { return userStorage.createUser(user); }
-    public User updateUser(User user) { return userStorage.updateUser(user); }
-    public void deleteUser(Long userId) { userStorage.deleteUser(userId); }
-    public User getUserById(Long userId) { return userStorage.getUserById(userId); }
-
+    public List<User> getAllUsers() {
+        return userStorage.getAllUsers();
     }
+
+    public User createUser(User user) {
+        return userStorage.createUser(user);
+    }
+
+    public User updateUser(User user) {
+        userStorage.validateId(user.getId());
+        return userStorage.updateUser(user);
+    }
+
+    public void deleteUser(Long userId) {
+        userStorage.validateId(userId);
+        userStorage.deleteUser(userId);
+    }
+
+    public User getUserById(Long userId) {
+        userStorage.validateId(userId);
+        return userStorage.getUserById(userId);
+    }
+
+}
